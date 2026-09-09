@@ -1,0 +1,43 @@
+"""
+config.py - Configuración global y constantes para "El Abismo Acecha"
+"""
+
+import pygame
+
+# --- PANTALLA Y RENDERING ---
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+TITLE = "El Abismo Acecha"
+FPS_CAP = 60
+MAX_DELTA_TIME = 0.1  # Clamping para evitar 'spiral of death' o tunneling
+
+# --- COLORES (Paleta Temática Sombría / Bosque) ---
+COLOR_BLACK = (10, 14, 12)
+COLOR_DARK_GREEN = (24, 48, 32)
+COLOR_FOG_GREEN = (40, 70, 50)
+COLOR_TEXT_WHITE = (230, 235, 230)
+COLOR_TEXT_GOLD = (235, 180, 70)
+COLOR_UI_BG = (20, 26, 24, 210)
+COLOR_HEALTH_RED = (190, 45, 45)
+COLOR_STAMINA_GREEN = (45, 180, 80)
+COLOR_DAY_SKY = (160, 200, 160)
+COLOR_NIGHT_SKY = (12, 16, 28)
+COLOR_FIRE_ORANGE = (255, 140, 40)
+
+# --- JUGADOR ---
+PLAYER_SPEED = 220.0  # Píxeles por segundo
+PLAYER_MAX_HP = 100
+PLAYER_MAX_STAMINA = 100.0
+PLAYER_STAMINA_REGEN = 15.0  # Por segundo
+PLAYER_SPRINT_MULT = 1.6
+PLAYER_SIZE = (32, 32)
+
+# --- MUNDO Y GRILLA ---
+TILE_SIZE = 48
+WORLD_WIDTH_TILES = 50
+WORLD_HEIGHT_TILES = 50
+WORLD_WIDTH = WORLD_WIDTH_TILES * TILE_SIZE
+WORLD_HEIGHT = WORLD_HEIGHT_TILES * TILE_SIZE
+
+# --- RUTAS DE BASE DE DATOS Y ASSETS ---
+DB_PATH = "abismo_acecha.db"
