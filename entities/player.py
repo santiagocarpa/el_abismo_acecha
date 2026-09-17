@@ -1,5 +1,5 @@
 """
-entities/player.py - Entidad del Jugador derivada de EntidadBase
+entities/player.py - Entidad del Jugador con Muerte (HP=0) y Sistema de Agotamiento de Estamina
 """
 
 import pygame
@@ -15,11 +15,22 @@ class Player(EntidadBase):
         # Atributos de Estado y Salud
         self.salud = PLAYER_MAX_HP
         self.salud_max = PLAYER_MAX_HP
+        self.is_dead = False
+
+        # Atributos de Estamina y Agotamiento
         self.stamina = PLAYER_MAX_STAMINA
         self.stamina_max = PLAYER_MAX_STAMINA
         self.is_sprinting = False
+        self.is_exhausted = False  # Bandera de cansancio cuando la estamina llega a 0
 
-        # Generar gráfico temporal estilo Pixel Art para el Jugador
+        # Equipamiento y Daño de Ataque
+        self.dano_base = 10
+        self.tiene_espada = False
+
+        # Referencia al Inventario (se asigna en GameScene)
+        self.inventory = None
+
+        # Sprite del Jugador
         self._create_sprite()
 
     def _create_sprite(self):
@@ -30,7 +41,22 @@ class Player(EntidadBase):
         # Cabeza / Dirección
         pygame.draw.circle(self.image, (220, 220, 220), (self.ancho // 2, self.alto // 2 - 6), 5)
 
+    def recibir_dano(self, cantidad: int):
+        """Aplica daño al jugador y verifica estado de muerte."""
+        if self.is_dead:
+            return
+
+        self.salud -= cantidad
+        if self.salud <= 0:
+            self.salud = 0
+            self.is_dead = True
+
     def handle_input(self):
+        if self.is_dead:
+            self.vx = 0.0
+            self.vy = 0.0
+            return
+
         keys = pygame.key.get_pressed()
         dx, dy = 0.0, 0.0
 
@@ -47,22 +73,36 @@ class Player(EntidadBase):
         if move_vec.length() > 0:
             move_vec = move_vec.normalize()
 
-        # Sprint (Tecla SHIFT)
-        self.is_sprinting = keys[pygame.K_LSHIFT] and self.stamina > 5.0 and move_vec.length() > 0
+        # Sprint: Solo permitido si NO está agotado y presiona SHIFT
+        want_sprint = keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]
+        if want_sprint and not self.is_exhausted and move_vec.length() > 0 and self.stamina > 0.0:
+            self.is_sprinting = True
+        else:
+            self.is_sprinting = False
+
         speed_mult = PLAYER_SPRINT_MULT if self.is_sprinting else 1.0
         
-        # Asignar a los vectores vx y vy de EntidadBase
         self.vx = move_vec.x * (PLAYER_SPEED * speed_mult)
         self.vy = move_vec.y * (PLAYER_SPEED * speed_mult)
 
     def actualizar_logica(self, dt: float):
+        if self.is_dead:
+            return
+
         self.handle_input()
 
-        # Gestión de Stamina
+        # Lógica de Consumo y Recuperación de Estamina
         if self.is_sprinting:
-            self.stamina = max(0.0, self.stamina - 35.0 * dt)
+            self.stamina -= 45.0 * dt
+            if self.stamina <= 0.0:
+                self.stamina = 0.0
+                self.is_sprinting = False
+                self.is_exhausted = True  # ¡El personaje se agota completamente!
         else:
             self.stamina = min(self.stamina_max, self.stamina + PLAYER_STAMINA_REGEN * dt)
+            # Recuperar de agotamiento solo cuando la estamina supera el 35%
+            if self.is_exhausted and self.stamina >= 35.0:
+                self.is_exhausted = False
 
         # Clamping dentro de los bordes del mapa del mundo
         self.x = max(16.0, min(WORLD_WIDTH - 16.0, self.x))
