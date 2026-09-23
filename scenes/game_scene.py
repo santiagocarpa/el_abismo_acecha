@@ -194,15 +194,10 @@ class GameScene(BaseScene):
                 spawn_y = self.player.y + random.choice([-350, 350])
                 self.enemies.append(Enemy(spawn_x, spawn_y))
 
-        # Actualizar Enemigos y Colisión de Daño con el Jugador
+        # Actualizar Enemigos según máquina de estados (PATRULLA, PERSECUCION, ATAQUE)
         for enemy in list(self.enemies):
-            enemy.set_target(self.player.pos)
+            enemy.set_target_player(self.player)
             enemy.actualizar(dt, obstaculos=self.structures)
-            
-            # Daño al jugador por contacto con enemigo
-            if enemy.hitbox.colliderect(self.player.hitbox) and enemy.attack_cooldown <= 0:
-                self.player.recibir_dano(enemy.dano)
-                enemy.attack_cooldown = 1.2
 
         for node in self.resource_nodes:
             node.actualizar(dt)
